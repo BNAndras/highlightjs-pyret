@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pyret Highlight.js Playground</title>
+    <!-- Use base16/dracula for high contrast -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/styles/base16/dracula.min.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #282a36;
+            color: #f8f8f2;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+        h1 {
+            margin-top: 0;
+            color: #bd93f9;
+        }
+        .container {
+            display: flex;
+            flex: 1;
+            gap: 20px;
+        }
+        .pane {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .pane-header {
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #8be9fd;
+        }
+        textarea, pre {
+            flex: 1;
+            margin: 0;
+            padding: 15px;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        textarea {
+            background: #44475a;
+            color: #f8f8f2;
+            border: 1px solid #6272a4;
+            resize: none;
+            outline: none;
+        }
+        textarea:focus {
+            border-color: #bd93f9;
+        }
+        pre {
+            background: #1e1f29 !important;
+            border: 1px solid #6272a4;
+            overflow: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Pyret Syntax Highlighting Playground</h1>
+    
+    <div class="container">
+        <div class="pane">
+            <div class="pane-header">Input Code</div>
+            <textarea id="input" spellcheck="false">
+# Write some Pyret code here!
+
+include string-dict
+
+data BinaryTree<A>:
+  | leaf
+  | node(value :: A, left :: BinaryTree<A>, right :: BinaryTree<A>)
+end
+
+fun map-tree<A, B>(f :: (A -> B), tree :: BinaryTree<A>) -> BinaryTree<B>:
+  doc: "Map a function over a binary tree"
+  cases (BinaryTree) tree:
+    | leaf => leaf
+    | node(v, l, r) =>
+      node(f(v), map-tree(f, l), map-tree(f, r))
+  end
+where:
+  t = node(1, leaf, node(2, leaf, leaf))
+  map-tree(lam(x): x * 2 end, t) is node(2, leaf, node(4, leaf, leaf))
+end
+
+#| 
+  A multi-line comment showing
+  a reactor definition 
+|#
+my-reactor = reactor:
+  init: 0,
+  on-tick: lam(state): state + 1 end,
+  title: "Counter"
+end
+            </textarea>
+        </div>
+        <div class="pane">
+            <div class="pane-header">Highlighted Output</div>
+            <pre><code id="output" class="language-pyret"></code></pre>
+        </div>
+    </div>
+
+    <!-- Load Highlight.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/highlight.min.js"></script>
+    
+    <script type="module">
+        import hljsDefinePyret from './src/pyret.js';
+        
+        // Register the Pyret language
+        hljs.registerLanguage('pyret', hljsDefinePyret);
+        
+        const input = document.getElementById('input');
+        const output = document.getElementById('output');
+        
+        function updateHighlighting() {
+            // Apply highlighting to the input text
+            const highlighted = hljs.highlight(input.value, { language: 'pyret' });
+            output.innerHTML = highlighted.value;
+        }
+        
+        // Update on input change
+        input.addEventListener('input', updateHighlighting);
+        
+        // Initial highlight
+        updateHighlighting();
+    </script>
+</body>
+</html>
